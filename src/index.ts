@@ -11,16 +11,17 @@
  * Learn more at https://developers.cloudflare.com/workers/
  */
 
-export default {
-	async fetch(request, env, ctx): Promise<Response> {
-		console.log(JSON.stringify(request.cf, null, 2));
-		return new Response(JSON.stringify({ hello: 'Peeples!' }), {
-			headers: {
-				'content-type': 'application/json',
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-				'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-			},
-		});
-	},
-} satisfies ExportedHandler<Env>;
+import { Hono } from 'hono';
+
+const app = new Hono<{ Bindings: Env }>();
+
+app.get('/', (c) => {
+	return c.json({ hello: 'Hono!' }, 200, {
+		'content-type': 'application/json',
+		'Access-Control-Allow-Origin': '*',
+		'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+		'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+	});
+});
+
+export default app;
