@@ -14,6 +14,13 @@
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
 		console.log(JSON.stringify(request.cf, null, 2));
-		return new Response('Hello Peeples!');
+		return new Response(JSON.stringify({ hello: 'Peeples!' }), {
+			headers: {
+				'content-type': 'application/json',
+				'Access-Control-Allow-Origin': '*',
+				'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+				'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+			},
+		});
 	},
 } satisfies ExportedHandler<Env>;
