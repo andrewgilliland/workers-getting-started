@@ -16,6 +16,13 @@ import { Ai } from '@cloudflare/ai';
 
 const app = new Hono<{ Bindings: Env }>();
 
+const responseHeaders = {
+	'content-type': 'application/json',
+	'Access-Control-Allow-Origin': '*',
+	'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+	'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
 app.get('/', async (c) => {
 	const ai = new Ai(c.env.AI);
 
@@ -30,12 +37,29 @@ app.get('/', async (c) => {
 
 	const response = await ai.run('@cf/mistral/mistral-7b-instruct-v0.1', inputs);
 
-	return c.json({ response }, 200, {
-		'content-type': 'application/json',
-		'Access-Control-Allow-Origin': '*',
-		'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-		'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+	return c.json({ response }, 200, responseHeaders);
+});
+
+app.get('/:username', async (c) => {
+	const username = c.req.param('username');
+
+	if (!username) {
+		return c.json({ error: 'Username is required' }, 400, responseHeaders);
+	}
+
+	const response = await fetch(`https://api.github.com/users/${username}/repos`, {
+		headers: {
+			'User-Agent': 'CF-Worker',
+		},
 	});
+
+	const data = await response.json();
+
+	if (!response.ok) {
+		return c.json({ error: 'Failed to fetch data from GitHub' }, 404, responseHeaders);
+	}
+
+	return c.json({ status: 'ok', data: data }, 200, responseHeaders);
 });
 
 export default app;
