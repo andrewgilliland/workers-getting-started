@@ -12,11 +12,25 @@
  */
 
 import { Hono } from 'hono';
+import { Ai } from '@cloudflare/ai';
 
 const app = new Hono<{ Bindings: Env }>();
 
-app.get('/', (c) => {
-	return c.json({ hello: 'Hono!' }, 200, {
+app.get('/', async (c) => {
+	const ai = new Ai(c.env.AI);
+
+	const content = c.req.query('query') || "You didn't provide any query parameters.";
+
+	const messages = [
+		{ role: 'system', content: 'You are a fun snarky assistant.' },
+		{ role: 'user', content },
+	];
+
+	const inputs = { messages };
+
+	const response = await ai.run('@cf/mistral/mistral-7b-instruct-v0.1', inputs);
+
+	return c.json({ response }, 200, {
 		'content-type': 'application/json',
 		'Access-Control-Allow-Origin': '*',
 		'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
