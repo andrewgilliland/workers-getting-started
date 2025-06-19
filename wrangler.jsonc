@@ -22,6 +22,19 @@
 	 * databases, object storage, AI inference, real-time communication and more.
 	 * https://developers.cloudflare.com/workers/runtime-apis/bindings/
 	 */
+	"kv_namespaces": [
+		{
+			"binding": "CACHE",
+			"id": "7f0a9402545e48958a85826a80c114b4"
+		}
+	],
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "movie-example",
+			"database_id": "6a706781-d7ed-4881-a1e4-560bad663567"
+		}
+	],
 
 	"ai": {
 		"binding": "AI"

@@ -43,6 +43,11 @@ app.get('/', async (c) => {
 app.get('/:username', async (c) => {
 	const username = c.req.param('username');
 
+	const cachedResponse = await c.env.CACHE.get(username, 'json');
+	if (cachedResponse) {
+		return c.json(cachedResponse, 200, responseHeaders);
+	}
+
 	if (!username) {
 		return c.json({ error: 'Username is required' }, 400, responseHeaders);
 	}
@@ -58,7 +63,7 @@ app.get('/:username', async (c) => {
 	if (!response.ok) {
 		return c.json({ error: 'Failed to fetch data from GitHub' }, 404, responseHeaders);
 	}
-
+	await c.env.CACHE.put(username, JSON.stringify(data));
 	return c.json({ status: 'ok', data: data }, 200, responseHeaders);
 });
 
