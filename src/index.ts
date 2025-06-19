@@ -67,4 +67,16 @@ app.get('/:username', async (c) => {
 	return c.json({ status: 'ok', data: data }, 200, responseHeaders);
 });
 
+app.get('/movies', async (c) => {
+	const db = c.env.DB;
+	const query = 'SELECT * FROM movies ORDER BY release_year DESC';
+	try {
+		const result = await db.prepare(query).all();
+		return c.json({ status: 'ok', data: result }, 200, responseHeaders);
+	} catch (error) {
+		console.error('Database query error:', error);
+		return c.json({ error: 'Database query failed' }, 500, responseHeaders);
+	}
+});
+
 export default app;
