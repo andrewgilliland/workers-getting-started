@@ -40,6 +40,19 @@ app.get('/', async (c) => {
 	return c.json({ response }, 200, responseHeaders);
 });
 
+app.get('/movies', async (c) => {
+	const db = c.env.DB;
+	const query = 'SELECT * FROM movies ORDER BY release_year DESC';
+	try {
+		console.log('Executing query:', query);
+		const result = await db.prepare(query).all();
+		return c.json({ status: 'ok', data: result }, 200, responseHeaders);
+	} catch (error) {
+		console.error('Database query error:', error);
+		return c.json({ error: 'Database query failed' }, 500, responseHeaders);
+	}
+});
+
 app.get('/:username', async (c) => {
 	const username = c.req.param('username');
 
@@ -65,18 +78,6 @@ app.get('/:username', async (c) => {
 	}
 	await c.env.CACHE.put(username, JSON.stringify(data));
 	return c.json({ status: 'ok', data: data }, 200, responseHeaders);
-});
-
-app.get('/movies', async (c) => {
-	const db = c.env.DB;
-	const query = 'SELECT * FROM movies ORDER BY release_year DESC';
-	try {
-		const result = await db.prepare(query).all();
-		return c.json({ status: 'ok', data: result }, 200, responseHeaders);
-	} catch (error) {
-		console.error('Database query error:', error);
-		return c.json({ error: 'Database query failed' }, 500, responseHeaders);
-	}
 });
 
 export default app;
