@@ -53,6 +53,39 @@ app.get('/movies', async (c) => {
 	}
 });
 
+app.get('/movies/favorites', async (c) => {
+	const db = c.env.DB;
+	const query = 'SELECT * FROM movies ORDER BY rating DESC LIMIT 3';
+	try {
+		console.log('Executing query:', query);
+		const result = await db.prepare(query).all();
+		return c.json({ status: 'ok', data: result }, 200, responseHeaders);
+	} catch (error) {
+		console.error('Database query error:', error);
+		return c.json({ error: 'Database query failed' }, 500, responseHeaders);
+	}
+});
+
+app.get('/movies/:id', async (c) => {
+	const db = c.env.DB;
+	const id = c.req.param('id');
+	if (!id) {
+		return c.json({ error: 'Movie ID is required' }, 400, responseHeaders);
+	}
+	const query = 'SELECT * FROM movies WHERE id = ?';
+	try {
+		console.log('Executing query:', query, 'with id:', id);
+		const result = await db.prepare(query).bind(id).first();
+		if (!result) {
+			return c.json({ error: 'Movie not found' }, 404, responseHeaders);
+		}
+		return c.json({ status: 'ok', data: result }, 200, responseHeaders);
+	} catch (error) {
+		console.error('Database query error:', error);
+		return c.json({ error: 'Database query failed' }, 500, responseHeaders);
+	}
+});
+
 app.get('/:username', async (c) => {
 	const username = c.req.param('username');
 
